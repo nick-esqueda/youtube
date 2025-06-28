@@ -14,8 +14,11 @@ RUN pip install pipenv && pipenv install --deploy --ignore-pipfile
 
 COPY . .
 
-EXPOSE 5000
+RUN chmod +x entrypoint.sh
 
 ENV FLASK_APP=application.py
+ENV FLASK_ENV=development
 
-CMD ["pipenv", "run", "gunicorn", "-b", "0.0.0.0:5000", "application:application"]
+EXPOSE 5000
+
+ENTRYPOINT ["./entrypoint.sh"]

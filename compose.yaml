@@ -1,0 +1,49 @@
+services:
+  web:
+    build: ./frontend
+    ports:
+      - 3000:3000
+    volumes:
+      # Sync host & container files for hot reloading
+      - ./frontend:/app
+
+      # Prevent syncing of node_modules
+      # (this prevents issues due to host/container OS differences & improves performance)
+      - /app/node_modules
+
+    environment:
+      - WATCHPACK_POLLING=true # Enable hot reloading
+      - NODE_ENV=development
+      - REACT_APP_BASE_URL=http://localhost:5000
+
+  api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - 5000:5000
+    secrets:
+      - env.vars
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - SECRET_KEY=${SECRET_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER" ]
+      start_period: 10s
+      interval: 5s
+      timeout: 5s
+      retries: 50
+
+secrets:
+  env.vars:
+    file: .env
