@@ -1,0 +1,11 @@
+# Node.js modules
+node_modules/
+
+# Playwright browser downloads
+.cache/ms-playwright/
+
+# Playwright authentication state
+playwright/.auth/
+
+# Playwright test results
+test-results/
